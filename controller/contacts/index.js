@@ -1,16 +1,23 @@
-const service = require("../service");
-const { RequestError } = require("../helpers");
+const service = require("../../service/schemas/contact");
+const { RequestError } = require("../../helpers");
 const {
   addContactSchema,
   updateContactSchema,
   updateStatusSchema,
-} = require("../schemas/contacts");
+} = require("../../validationSchemas/contacts");
 const get = async (req, res, next) => {
   try {
-    res.json({
-      code: 200,
-      message: await service.getAllContacts(),
-    });
+    const addOwnerToQuery = Object.assign(req.query, { owner: req.user.id });
+    console.log(addOwnerToQuery);
+    const result = await service.getAllContacts(addOwnerToQuery);
+    result?.length > 0
+      ? res.json({
+          code: 200,
+          message: result,
+        })
+      : res.json({
+          message: "Not found",
+        });
   } catch (error) {
     next(error);
   }
@@ -18,7 +25,7 @@ const get = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const { contactId } = req.params;
-    const result = await service.getContactById(contactId);
+    const result = await service.getContactById(contactId, req.user.id);
     if (!result) {
       throw RequestError(404, "Not Found");
     }
@@ -33,9 +40,12 @@ const addContact = async (req, res, next) => {
     if (error) {
       throw RequestError(400, "missing required name field");
     }
-    const contact = await service.addContact(req.body);
+    const { name, email, phone, favorite, _id } = await service.addContact(
+      req.body,
+      req.user.id
+    );
     res.status(201).json({
-      data: { contact },
+      data: { name, email, phone, favorite, _id },
     });
   } catch (error) {
     next(error);
@@ -44,7 +54,7 @@ const addContact = async (req, res, next) => {
 const removeContact = async (req, res, next) => {
   try {
     const { contactId } = req.params;
-    const result = await service.removeContact(contactId);
+    const result = await service.removeContact(contactId, req.user.id);
     if (!result) {
       throw RequestError(404, "Not Found");
     }
@@ -60,7 +70,9 @@ const updateContact = async (req, res, next) => {
       throw RequestError(400, "missing fields");
     }
     const { contactId } = req.params;
-    const result = await service.updateContact(contactId, { ...req.body });
+    const result = await service.updateContact(contactId, req.user.id, {
+      ...req.body,
+    });
     if (!result) {
       throw RequestError(404, "Not Found");
     }
@@ -76,7 +88,11 @@ const updateFavorite = async (req, res, next) => {
       throw RequestError(400, "missing field favorite");
     }
     const { contactId } = req.params;
-    const result = await service.updateStatusContact(contactId, req.body);
+    const result = await service.updateStatusContact(
+      contactId,
+      req.user.id,
+      req.body
+    );
     if (!result) {
       throw RequestError(404, "Not Found");
     }
