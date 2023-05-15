@@ -1,6 +1,6 @@
 const User = require("./users");
-const createUser = async ({ email, password }) => {
-  return User.create({ email, password });
+const createUser = async ({ email, password, avatar }) => {
+  return User.create({ email, password, avatarURL: avatar });
 };
 const checkUser = async ({ email }) => {
   return User.findOne({ email });
@@ -8,8 +8,16 @@ const checkUser = async ({ email }) => {
 const updateToken = async ({ tok }) => {
   return User.updateOne({ token: tok });
 };
-const updateSubscription =async (id, sub) => {
-  return User.findByIdAndUpdate({ _id: id }, {subscription:sub});
+const updateSubscription = async (id, sub) => {
+  return User.findByIdAndUpdate({ _id: id }, { subscription: sub },{returnDocument:'after'});
 };
-
-module.exports = { createUser, checkUser, updateToken ,updateSubscription};
+const updateAvatar = async (id, avatar) => {
+  return User.findByIdAndUpdate({ _id: id }, { avatarURL: avatar },{returnDocument:'after'});
+};
+module.exports = {
+  createUser,
+  checkUser,
+  updateToken,
+  updateSubscription,
+  updateAvatar,
+};

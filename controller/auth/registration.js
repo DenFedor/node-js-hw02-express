@@ -1,3 +1,4 @@
+const generateAvatar = require("../../helpers/generateAvatar");
 const service = require("../../service/schemas/user");
 const { authUserSchema } = require("../../validationSchemas/auth");
 const bcrypt = require('bcrypt');
@@ -11,7 +12,8 @@ const registration = async (req, res, next) => {
     const {email,password} =req.body;
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
-    const { subscription } = await service.createUser({email,password:hashedPassword});
+    const avatar=generateAvatar(email);
+    const { subscription } = await service.createUser({email,password:hashedPassword,avatar});
     res.status(201).json({ user: { email, subscription } });
   } catch (error) {
     next(error);

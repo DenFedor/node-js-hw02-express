@@ -4,7 +4,9 @@ const cors = require("cors");
 require("dotenv").config();
 const contactsRouter = require("./routes/api/contacts.js");
 const authRouter = require("./routes/api/auth.js");
+const userRouter = require("./routes/api/users.js");
 const app = express();
+const path = require('path')
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
@@ -14,6 +16,9 @@ app.use(express.json());
 
 app.use("/api/contacts", contactsRouter);
 app.use("/api/auth", authRouter);
+app.use("/", userRouter);
+
+app.use('/avatars', express.static(path.join(__dirname, 'public/avatars/')))
 app.use((req, res) => {
   res.status(404).json({ status: "error", code: 404, data: "Not found" });
 });
