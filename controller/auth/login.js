@@ -20,6 +20,9 @@ const login = async (req, res, next) => {
     if (!isValidPassword) {
       throw RequestError(401);
     }
+    if (!user.verify) {
+      throw RequestError(401,"Not verified");
+    }
     const { subscription, _id } = user;
     const token=jwt.sign({id: _id}, JWT_SECRET,{ expiresIn: '1d' });
     await user.updateOne({token});
