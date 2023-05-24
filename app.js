@@ -31,14 +31,31 @@ app.use((err, req, res, next) => {
   }
   if (err.name === "ValidationError") {
     return res.status(400).json({
-      message: err.name,
+      message: err.name,err
     });
   }
+  if (err.message.includes("missing required field email")) {
+    return res.status(400).json({
+      message: "Missing required field email",
+    });
+  }
+
   if (err.message.includes("Unauthorized")) {
     return res.status(401).json({
       message: "Email or password is wrong",
     });
   }
+  if (err.message.includes("Not verified")) {
+    return res.status(401).json({
+      message: "User not verified",
+    });
+  }
+  if (err.message.includes("User had been already verified")) {
+    return res.status(400).json({
+      message: err.message,
+    });
+  }
+ 
   if (
     err.message.includes("Token type is not valid") ||
     err.message.includes("No token provided") ||
